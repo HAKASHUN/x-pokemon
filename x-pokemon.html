@@ -14,8 +14,22 @@
 -->
 <polymer-element name="x-pokemon" attributes="name">
     <template>
-        <img class="pokemon" alt="{{name}}" src="http://img.pokemondb.net/artwork/{{name}}.jpg">
+        <style>
+            :host {
+                position: relative;
+            }
+            .pokemon-message {
+                color: red;
+                position: absolute;
+                bottom: 0;
+                left:0;
+                background: rgba(0, 0, 0, .5);
+            }
+        </style>
+        <span class="pokemon-message">{{message}}</span>
+        <img class="pokemon" alt="{{name}}" src="{{imageSrc}}">
     </template>
+
     <script>
         Polymer('x-pokemon', {
             /**
@@ -25,7 +39,31 @@
              * @type string
              * @default ''
              */
-            name: ''
+            name: '',
+            nameChanged: function(oldVal, newVal) {
+                var self = this;
+                self.message = '';
+                if(!newVal) {
+                    return;
+                }
+                new Promise(function(resolve, reject) {
+                    var image = new Image();
+                    image.src = 'http://img.pokemondb.net/artwork/'+ newVal +'.jpg';
+                    image.onload = function() {
+                        resolve(image.src);
+                    };
+                    image.onerror = function() {
+                        reject();
+                    }
+                }).then(function(src){
+                    self.imageSrc = src;
+                }, function() {
+                    self.message = '\"' + newVal + '\" is undefined.';
+                });
+            },
+            handleResponse: function() {
+                debugger;
+            }
         });
     </script>
 </polymer-element>
